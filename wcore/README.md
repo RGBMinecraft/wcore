@@ -1,23 +1,16 @@
-# WCore (Fabric, nur Client)
+# WCore (Fabric, nur Client, Minecraft 1.21.11)
 
-Befehle im Spiel (Minecraft-Befehle beginnen mit `/`, nicht mit `./`):
+Befehle im Spiel (mit `/`, nicht mit `./`):
 
-- `/wcore ignore <spieler>` blendet den Spieler aus. Nochmal eingeben, dann ist er wieder da.
+- `/wcore ignore <spieler>` blendet den Spieler aus (auch Chat und Simple-Voice-Chat). Nochmal eingeben = wieder sichtbar.
 - `/wcore skinchange <spieler> <skin>` ersetzt den Skin von `<spieler>` durch den Skin von `<skin>`.
 - `/wcore skinchange <spieler>` setzt den Skin zurueck.
+- `/wcore nickname <name>` aendert deinen Anzeigenamen (ohne Namen = zuruecksetzen).
+- `/wcore rename <spieler> <name>` aendert den Anzeigenamen eines anderen Spielers (nur bei dir).
+- `/wcore settings` oeffnet die Einstellungen (auch ueber Mod Menu).
 - `/wcore list` zeigt alle aktiven Einstellungen.
 
-Alles passiert nur bei dir lokal, andere Spieler sehen nichts davon.
+Alles passiert nur bei dir lokal. Nur dein Nickname wird (wenn aktiviert) ueber unsichtbare Chatnachrichten
+an andere WCore-Nutzer gesendet. Einstellungen liegen in `config/wcore.json`.
 
-## Bauen
-
-Voraussetzung: JDK 21 und Gradle (oder der Gradle-Wrapper aus der Fabric-Vorlage).
-
-    gradle build
-
-Die fertige Mod liegt danach unter `build/libs/wcore-1.0.0.jar` (nicht die `-sources.jar`).
-Sie gehoert in den `mods`-Ordner, zusammen mit Fabric Loader und Fabric API fuer Minecraft 1.21.4.
-
-Andere Minecraft-Version: Werte in `gradle.properties` anpassen (siehe https://fabricmc.net/develop)
-und `fabric.mod.json` (`minecraft`-Version). Bei neueren Versionen koennen sich Klassen-/Methodennamen
-in den Mixins aendern.
+Bauen: `gradle build` (JDK 25 und Gradle 9.x). Ergebnis: `build/libs/wcore-<version>.jar`.

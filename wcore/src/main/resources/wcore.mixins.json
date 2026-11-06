@@ -5,7 +5,9 @@
   "client": [
     "AbstractClientPlayerMixin",
     "EntityRenderDispatcherMixin",
-    "MinecraftAccessor"
+    "MinecraftAccessor",
+    "EntityMixin",
+    "PlayerTabOverlayMixin"
   ],
   "injectors": {
     "defaultRequire": 1

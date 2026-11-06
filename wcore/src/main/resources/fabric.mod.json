@@ -3,13 +3,15 @@
   "id": "wcore",
   "version": "${version}",
   "name": "WCore",
-  "description": "Client-seitig: Spieler ausblenden und Skins ersetzen per /wcore.",
+  "description": "Client-seitig: Spieler ausblenden (inkl. Chat und Voicechat), Skins ersetzen, Nicknames.",
   "authors": ["wcore"],
   "license": "MIT",
   "icon": "assets/wcore/icon.png",
   "environment": "client",
   "entrypoints": {
-    "client": ["de.wcore.WCoreClient"]
+    "client": ["de.wcore.WCoreClient"],
+    "modmenu": ["de.wcore.WCoreModMenu"],
+    "voicechat": ["de.wcore.WCoreVoicechatPlugin"]
   },
   "mixins": ["wcore.mixins.json"],
   "depends": {
@@ -17,5 +19,9 @@
     "minecraft": "~1.21.11",
     "java": ">=21",
     "fabric-api": "*"
+  },
+  "suggests": {
+    "modmenu": "*",
+    "voicechat": "*"
   }
 }

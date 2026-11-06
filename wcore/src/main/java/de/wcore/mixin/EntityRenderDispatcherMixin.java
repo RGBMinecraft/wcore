@@ -10,8 +10,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.Locale;
-
 @Mixin(EntityRenderDispatcher.class)
 public abstract class EntityRenderDispatcherMixin {
 
@@ -19,7 +17,7 @@ public abstract class EntityRenderDispatcherMixin {
     private <E extends Entity> void wcore$hideIgnored(E entity, Frustum frustum, double x, double y, double z,
                                                       CallbackInfoReturnable<Boolean> cir) {
         if (entity instanceof AbstractClientPlayer player
-                && WCoreClient.IGNORED.contains(player.getName().getString().toLowerCase(Locale.ROOT))) {
+                && WCoreClient.isIgnored(player.getName().getString())) {
             cir.setReturnValue(false);
         }
     }

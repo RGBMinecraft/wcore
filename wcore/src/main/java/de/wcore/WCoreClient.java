@@ -1,22 +1,32 @@
 package de.wcore;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
+import de.wcore.mixin.MinecraftAccessor;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.PlayerInfo;
-import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.level.block.entity.SkullBlockEntity;
+import net.minecraft.world.entity.player.PlayerSkin;
 
+import java.net.URI;
+import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -38,13 +48,17 @@ public class WCoreClient implements ClientModInitializer {
     /** Name (kleingeschrieben) -> Ersatz-Skin. */
     public static final Map<String, PlayerSkin> SKINS = new ConcurrentHashMap<>();
 
+    private static final HttpClient HTTP = HttpClient.newBuilder()
+            .connectTimeout(Duration.ofSeconds(8))
+            .build();
+
     private static final SuggestionProvider<FabricClientCommandSource> ONLINE_PLAYERS = (ctx, builder) -> {
         var connection = Minecraft.getInstance().getConnection();
         if (connection == null) {
             return builder.buildFuture();
         }
         return SharedSuggestionProvider.suggest(
-                connection.getOnlinePlayers().stream().map(p -> p.getProfile().getName()),
+                connection.getOnlinePlayers().stream().map(p -> p.getProfile().name()),
                 builder);
     };
 
@@ -90,14 +104,41 @@ public class WCoreClient implements ClientModInitializer {
         return 1;
     }
 
+    /** Fragt bei Mojang die UUID zu einem Spielernamen ab. */
+    private static CompletableFuture<Optional<GameProfile>> lookupProfile(String name) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                HttpRequest request = HttpRequest.newBuilder(URI.create(
+                                "https://api.mojang.com/minecraft/profile/lookup/name/"
+                                        + URLEncoder.encode(name, StandardCharsets.UTF_8)))
+                        .timeout(Duration.ofSeconds(10))
+                        .GET()
+                        .build();
+                HttpResponse<String> response = HTTP.send(request, HttpResponse.BodyHandlers.ofString());
+                if (response.statusCode() != 200) {
+                    return Optional.<GameProfile>empty();
+                }
+                JsonObject json = JsonParser.parseString(response.body()).getAsJsonObject();
+                String id = json.get("id").getAsString();
+                String realName = json.get("name").getAsString();
+                UUID uuid = UUID.fromString(id.replaceFirst(
+                        "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)",
+                        "$1-$2-$3-$4-$5"));
+                return Optional.of(new GameProfile(uuid, realName));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
     private static int changeSkin(CommandContext<FabricClientCommandSource> ctx, String target, String skinOwner) {
         FabricClientCommandSource source = ctx.getSource();
         Minecraft mc = Minecraft.getInstance();
         source.sendFeedback(Component.literal("[WCore] Lade Skin von " + skinOwner + " ..."));
 
-        SkullBlockEntity.fetchGameProfile(skinOwner)
+        lookupProfile(skinOwner)
                 .thenCompose(profile -> profile.isPresent()
-                        ? mc.getSkinManager().getOrLoad(profile.get())
+                        ? ((MinecraftAccessor) mc).wcore$getSkinManager().get(profile.get())
                         : CompletableFuture.completedFuture(Optional.<PlayerSkin>empty()))
                 .thenAccept(skin -> mc.execute(() -> {
                     if (skin.isPresent()) {

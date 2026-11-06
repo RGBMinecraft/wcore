@@ -6,14 +6,15 @@
   "description": "Client-seitig: Spieler ausblenden und Skins ersetzen per /wcore.",
   "authors": ["wcore"],
   "license": "MIT",
+  "icon": "assets/wcore/icon.png",
   "environment": "client",
   "entrypoints": {
     "client": ["de.wcore.WCoreClient"]
   },
   "mixins": ["wcore.mixins.json"],
   "depends": {
-    "fabricloader": ">=0.16.0",
-    "minecraft": "~1.21.4",
+    "fabricloader": ">=0.18.0",
+    "minecraft": "~1.21.11",
     "java": ">=21",
     "fabric-api": "*"
   }

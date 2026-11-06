@@ -19,7 +19,7 @@ public abstract class EntityRenderDispatcherMixin {
     private <E extends Entity> void wcore$hideIgnored(E entity, Frustum frustum, double x, double y, double z,
                                                       CallbackInfoReturnable<Boolean> cir) {
         if (entity instanceof AbstractClientPlayer player
-                && WCoreClient.IGNORED.contains(player.getGameProfile().getName().toLowerCase(Locale.ROOT))) {
+                && WCoreClient.IGNORED.contains(player.getName().getString().toLowerCase(Locale.ROOT))) {
             cir.setReturnValue(false);
         }
     }

@@ -14,10 +14,10 @@ jobs:
           java-version: 21
       - uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: 8.12
+          gradle-version: 9.8.2
       - run: gradle build
         working-directory: wcore
       - uses: actions/upload-artifact@v4
         with:
           name: wcore-jar
-          path: wcore/build/libs/wcore-1.0.0.jar
+          path: wcore/build/libs/wcore-1.1.0.jar
